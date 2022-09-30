@@ -105,13 +105,15 @@ boolean simonSpeaks(int * sentence, int length){
     boolean newWord = false;
     switch(element){
       unsigned long previousMillis = millis();
-      case 0:
+      case 0: {
         return false;
+        }
         
       case 1: {
         while(newWord = false){
           lightLED(LEDBlue,previousMillis);
-        }}
+          }
+        }
         break;
         
       case 2: {
@@ -123,12 +125,14 @@ boolean simonSpeaks(int * sentence, int length){
       case 3: {
         while(newWord = false){
           lightLED(LEDYellow,previousMillis);
-        }}
+          }
+        }
         break;
       case 4: {
         while(newWord = false){
           lightLED(LEDRed,previousMillis);
-        }}
+          }
+        }
         break;
     }
   }
@@ -168,11 +172,11 @@ boolean game() {
                 break;
               }
             }
-
+            
             //win level
             if (j==sentenceLength){
               break;
-            }
+              }
             }
 
           case 2: {
