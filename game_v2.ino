@@ -13,6 +13,8 @@ int buttonBlue = 1;
 int j=0;
 
 const long lightUpTime = 1000;
+const long inputTime = 5000;
+
 int count = 0;
 int currentSentence[32]= {0};
 bool newWord;
@@ -62,41 +64,43 @@ void lightLED(int LED,int previousMillis){
 }
 
 //user input function
-//void userSentenceInput () {
-//  if (digitalRead(buttonYellow) == LOW){
-//    j++;
-//    currentSentence[j]=1; //1 represents yellow
-//
-//    //light led
-//    lightLED
-//
-//  }
-//  
-//  else if (digitalRead(buttonGreen) == LOW){
-//    j++;
-//    currentSentence[j]=2; //2 represents green
-//    analogWrite(ledRed, 0);
-//    analogWrite(ledGreen, 255);
-//    analogWrite(ledBlue, 0);
-//  }
-//  
-//  else if (digitalRead(buttonRed) == LOW){
-//    j++;
-//    currentSentence[j]=3; //3 represents red
-//    analogWrite(ledRed, 255);
-//    analogWrite(ledGreen, 0);
-//    analogWrite(ledBlue, 0);   
-//  }
-//  
-//  else if (digitalRead(buttonBlue) == LOW){
-//    j++;
-//    currentSentence[j]=4; //4 represents blue
-//    analogWrite(ledRed, 0);
-//    analogWrite(ledGreen, 0);
-//    analogWrite(ledBlue, 255);
-//  }
-//  return currentSentence;
-//}
+int userSentenceInput(){
+  long previousInputMillis = millis();
+  long inputMillis = millis();
+
+  while (inputMillis - previousInputMillis >= inputTime){
+    inputMillis = millis();
+    if (digitalRead(buttonYellow) == HIGH){
+      while(digitalRead(buttonYellow) == HIGH){
+        digitalWrite(LEDYellow,HIGH);
+      }
+      digitalWrite(LEDYellow,LOW);
+      return 1;
+    }
+    else if (digitalRead(buttonGreen) == HIGH){
+      while(digitalRead(buttonGreen) == HIGH){
+        digitalWrite(LEDGreen,HIGH);
+      }
+      digitalWrite(LEDGreen,LOW);
+      return 2;
+    }
+    else if (digitalRead(buttonRed) == HIGH){
+      while(digitalRead(buttonRed) == HIGH){
+        digitalWrite(LEDRed,HIGH);
+      }
+      digitalWrite(LEDRed,LOW);
+      return 3;
+    }
+    else if (digitalRead(buttonBlue) == HIGH){
+      while(digitalRead(buttonBlue) == HIGH){
+        digitalWrite(LEDBlue,HIGH);
+      }
+      digitalWrite(LEDBlue,LOW);
+      return 4;
+    }
+  }
+  return 5; 
+}
 
 
 boolean simonSpeaks(int * sentence, int length){
@@ -164,11 +168,11 @@ boolean game() {
             while (currentSentence[j]!=0){ //while loop and lose ==false
               //input a number (rewrite userSentenceInput to return int and light up LED)
               int input = userSentenceInput(); 
-              if (compare_sentence(currentSentence, input, j) = true) {
+              if (compare_sentence(currentSentence, input, j) == true) {
                 j++;
               }
               else {
-                return = false;
+                return false;
                 break;
               }
             }
