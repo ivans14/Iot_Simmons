@@ -2,13 +2,13 @@
 
 int gameModeChoice = 1; 
 bool compareSentence = true;
-int LEDRed;
-int LEDBlue;
-int LEDGreen;
-int LEDYellow;
-int buttonYellow = 1;
-int buttonGreen = 1;
-int buttonRed = 1;
+int LEDRed = 8;
+int LEDBlue = 11;
+int LEDGreen = 10;
+int LEDYellow = 9;
+int buttonYellow = 3;
+int buttonGreen = 4;
+int buttonRed = 2;
 int buttonBlue = 1;
 int j=0;
 
@@ -18,6 +18,7 @@ const long inputTime = 5000;
 int count = 0;
 int currentSentence[32]= {0};
 bool newWord;
+bool chosen = false;
 
 
 //=============================================functions==========================================
@@ -28,14 +29,28 @@ int gameMode() {
   Serial.println("    2. Multi Player - adding colors alternately");
   Serial.println("    1. Multi Player - responsible for a color each");
 
-  while (Serial.available() == 0) {
+  /*while (Serial.available() == 0) {
+  }*/
+
+  while(chosen == false){
+    if(buttonRed == HIGH){
+      int gameModeChoice = 1;
+      chosen = true;
+    }
+    else if(buttonYellow == HIGH){
+      int gameModeChoice = 2;
+      chosen = true;
+    }
+    else if(buttonGreen == HIGH){
+      int gameModeChoice = 3;
+      chosen = true;
+    }
   }
 
-  int gameModeChoice = Serial.parseInt();
+  //int gameModeChoice = Serial.parseInt();
 
-  return gameModeChoice;
-  
-  }
+  return gameModeChoice;  
+}
 
 int * SentenceAdd(int *  current_sentence) {
   int ran_number = rand() % 4 +1;
@@ -262,7 +277,16 @@ boolean game() {
 void setup() {
 
   Serial.begin(9600);
-  // put your setup code here, to run once:
+
+  pinMode(LEDRed, OUTPUT);
+  pinMode(LEDBlue, OUTPUT);
+  pinMode(LEDGreen, OUTPUT);
+  pinMode(LEDYellow, OUTPUT);
+
+  pinMode(buttonRed, INPUT_PULLUP);
+  pinMode(buttonBlue, INPUT_PULLUP);
+  pinMode(buttonGreen, INPUT_PULLUP);
+  pinMode(buttonYellow, INPUT_PULLUP);
 
 }
 
