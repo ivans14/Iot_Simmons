@@ -173,6 +173,7 @@ boolean game() {
         }
         int skillLevel = Serial.parseInt();
         switch (skillLevel) {
+           // Insert a while loop within the case, of which you return out if you've won or lost.
           case 1: {
             int sentenceLength = 8; 
             SentenceAdd(currentSentence);
@@ -188,13 +189,13 @@ boolean game() {
               }
               else {
                 return false;
-                break;
               }
+              break;
             }
             
             //win level
             if (j==sentenceLength){
-              break;
+              return true
               }
             }
 
