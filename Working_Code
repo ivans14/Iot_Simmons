@@ -10,12 +10,13 @@ int buttonYellow = 9;
 int buttonGreen = 10;
 int buttonRed = 8;
 int buttonBlue = 11;
+int buttonReset = 12;
 
 int buzzerPin = 6;
 
 int j=0;
 
-const long lightUpTime = 1000;
+const long lightUpTime = 500;
 const long inputTime = 5000;
 
 int skill;
@@ -67,19 +68,19 @@ Serial.println("You have chosen gamemode 1. Please choose skill level from 1-4")
 
   while(skillChosen == false){
     if(digitalRead(buttonRed) == LOW){
-      int skill = 8;
-      skillChosen = true;
+      skill = 8;
+	  skillChosen = true;
     }
     else if(digitalRead(buttonYellow) == LOW){
-      int skill = 16;
+      skill = 16;
       skillChosen = true;
     }
     else if(digitalRead(buttonGreen) == LOW){
-      int skill = 24;
+      skill = 24;
       skillChosen = true;
     }
     else if(digitalRead(buttonBlue) == LOW){
-      int skill = 32;
+      skill = 32;
       skillChosen = true;
     }
   }
@@ -172,8 +173,9 @@ boolean simonSpeaks(int * sentence, int length){
     boolean newWord = false;
     Serial.print("element" );
     Serial.println( element);
+    unsigned long previousMillis = millis();
     switch(element){
-      unsigned long previousMillis = millis();
+      
       
       case 0: {
         Serial.println("zero");
@@ -181,23 +183,23 @@ boolean simonSpeaks(int * sentence, int length){
         }
         
       case 1: {
-          lightLED(LEDBlue,previousMillis);
+          lightLED(LEDBlue,previousMillis,4000);
           
         }
         break;
         
       case 2: {
-          lightLED(LEDGreen,previousMillis);
+          lightLED(LEDGreen,previousMillis,2000);
         }
         break;
         
       case 3: {
-          lightLED(LEDYellow,previousMillis);
+          lightLED(LEDYellow,previousMillis,1000);
         }
         break;
       case 4: {
 
-        lightLED(LEDRed,previousMillis);
+        lightLED(LEDRed,previousMillis,3000);
      
         }
         break;
@@ -213,6 +215,7 @@ boolean game() {
     case 1: {
         int sentenceLength = skillLevel();
 	int index = 0;
+    Serial.println(sentenceLength);
 	
 	while(index<sentenceLength){
 		j=0;
@@ -236,9 +239,10 @@ boolean game() {
 				break;
 			}
 		}
+      	delay(300);
 		index ++;
 	}
-	if (j>=sentenceLength){
+	if (j>=sentenceLength-1){
 		Serial.println("congrats");
 		return true;
 	}
@@ -290,15 +294,28 @@ void setup() {
   pinMode(buttonBlue, INPUT_PULLUP);
   pinMode(buttonGreen, INPUT_PULLUP);
   pinMode(buttonYellow, INPUT_PULLUP);
+  pinMode(buttonReset, INPUT_PULLUP);
 
 }
 
 void loop() {
+  bool reset = false;
 
   bool ending = game();
-
+  Serial.println("return game");
   if (ending == true){
-    //Player won
+    while (reset!=true){
+      if (digitalRead(buttonReset)==LOW){
+        reset=true;
+        j=0;
+        skill = 0;
+        count = 0;
+        currentSentence[32]= {0};
+        newWord = false;
+        chosen = false;
+        skillChosen = false;
+      }
+    }
   }
   else if(ending == false){
     //Player Lost
