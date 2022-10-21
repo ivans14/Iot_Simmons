@@ -1,5 +1,7 @@
 int gameModeChoice = 1; 
+
 bool compareSentence = true;
+
 int LEDRed = 2;
 int LEDBlue = 1;
 int LEDGreen = 4;
@@ -8,16 +10,20 @@ int buttonYellow = 9;
 int buttonGreen = 10;
 int buttonRed = 8;
 int buttonBlue = 11;
+
+int buzzerPin = 6;
+
 int j=0;
 
 const long lightUpTime = 1000;
 const long inputTime = 5000;
 
+int skill;
 int count = 0;
 int currentSentence[32]= {0};
-bool newWord = false;
+bool newWord;
 bool chosen = false;
-
+bool skillChosen = false;
 
 //=============================================functions==========================================
 
@@ -34,10 +40,12 @@ int gameMode() {
       chosen = true;
       Serial.println("Gamemode 1 chosen");
     }
+    
     else if(digitalRead(buttonYellow) == LOW){
       int gameModeChoice = 2;
       chosen = true;
     }
+    
     else if(digitalRead(buttonGreen) == LOW){
       int gameModeChoice = 3;
       chosen = true;
@@ -45,9 +53,37 @@ int gameMode() {
   }
 
   //int gameModeChoice = Serial.parseInt();
-  Serial.println("Gamemode 1 ");
+  //Serial.println("Gamemode 1 ");
 
   return gameModeChoice;  
+}
+
+int skillLevel(){
+Serial.println("You have chosen gamemode 1. Please choose skill level from 1-4");
+  Serial.println("    1. Repeat a sequence of 8 colours");
+  Serial.println("    2. Repeat a sequence of 14 colours");
+  Serial.println("    3. Repeat a sequence of 20 colours");
+  Serial.println("    4. Repeat a sequence of 31 colours");
+
+  while(skillChosen == false){
+    if(digitalRead(buttonRed) == LOW){
+      int skill = 8;
+      skillChosen = true;
+    }
+    else if(digitalRead(buttonYellow) == LOW){
+      int skill = 16;
+      skillChosen = true;
+    }
+    else if(digitalRead(buttonGreen) == LOW){
+      int skill = 24;
+      skillChosen = true;
+    }
+    else if(digitalRead(buttonBlue) == LOW){
+      int skill = 32;
+      skillChosen = true;
+    }
+  }
+  return skill;
 }
 
 int * SentenceAdd(int *  current_sentence) {
@@ -67,14 +103,16 @@ bool compare_sentence(int * sentence, int input, int index){
 }
 
 
-void lightLED(int LED,int previousMillis){
+void lightLED(int LED,int previousMillis, int freq){
   Serial.println("light");
   digitalWrite(LED,HIGH);
+  tone(buzzerPin,freq);
   unsigned long currentMillis = millis();
   while (currentMillis - previousMillis <= lightUpTime){
     currentMillis=millis(); 
     }
   digitalWrite(LED,LOW);
+  noTone(buzzerPin);
   delay(500);
   newWord=true;
 }
@@ -89,29 +127,37 @@ int userSentenceInput(){
     if (digitalRead(buttonYellow) == LOW){
       while(digitalRead(buttonYellow) == LOW){
         digitalWrite(LEDYellow,HIGH);
+	tone(buzzerPin,1000);
       }
       digitalWrite(LEDYellow,LOW);
+      noTone(buzzerPin);
       return 3;
     }
     else if (digitalRead(buttonGreen) == LOW){
       while(digitalRead(buttonGreen) == LOW){
         digitalWrite(LEDGreen,HIGH);
+	tone(buzzerPin,2000);
       }
       digitalWrite(LEDGreen,LOW);
+      noTone(buzzerPin);
       return 2;
     }
     else if (digitalRead(buttonRed) == LOW){
       while(digitalRead(buttonRed) == LOW){
         digitalWrite(LEDRed,HIGH);
+	tone(buzzerPin,3000);
       }
       digitalWrite(LEDRed,LOW);
+      noTone(buzzerPin);
       return 4;
     }
     else if (digitalRead(buttonBlue) == LOW){
       while(digitalRead(buttonBlue) == LOW){
         digitalWrite(LEDBlue,HIGH);
+	tone(buzzerPin,4000);
       }
       digitalWrite(LEDBlue,LOW);
+      noTone(buzzerPin);
       return 1;
     }
   }
@@ -124,10 +170,10 @@ boolean simonSpeaks(int * sentence, int length){
   for (int pos = 0; pos < length; pos++){
     int element = sentence[pos];
     boolean newWord = false;
-    unsigned long previousMillis = millis();
     Serial.print("element" );
     Serial.println( element);
     switch(element){
+      unsigned long previousMillis = millis();
       
       case 0: {
         Serial.println("zero");
@@ -165,107 +211,38 @@ boolean game() {
   
   switch (gameMode()) {
     case 1: {
-        Serial.println("You have chosen gamemode 1. Please choose skill level from 1-4");
-        Serial.println("    1. Repeat a sequence of 8 colours");
-        Serial.println("    2. Repeat a sequence of 14 colours");
-        Serial.println("    3. Repeat a sequence of 20 colours");
-        Serial.println("    4. Repeat a sequence of 31 colours");
-
-
-        int skillLevel =0;
-         while (skillLevel == 0){
-            if(digitalRead(buttonRed) == LOW){
-                skillLevel = 1;
-                Serial.println("skill 1 chosen");
-                }
-            else if(digitalRead(buttonYellow) == LOW){
-                skillLevel = 2;
-                }
-            else if(digitalRead(buttonGreen) == LOW){
-                int gameModeChoice = 3;
-                }
-            
-        }
-        switch (skillLevel) {
-          case 1: {
-            int sentenceLength = 8; 
-            int index = 0;
-            while(index<sentenceLength){
-                j=0;
-                SentenceAdd(currentSentence);
-                for (int i = 0;i<8;i++){
-                    Serial.println(currentSentence[i]);
-                }
-                simonSpeaks(currentSentence,sentenceLength);
-                Serial.println("user input");
-                //win or loose round
-                
-                while (currentSentence[j]!=0){ //while loop and lose ==false
-                //input a number (rewrite userSentenceInput to return int and light up LED)
-                    int input = userSentenceInput(); 
-                    Serial.println(input);
-                    if (compare_sentence(currentSentence, input, j) == true) {
-                        Serial.println("correct");
-                        j++;
-                    }
-                    else {
-                      Serial.println("you lose idiot");
-                        return false;
-                        break;
-                    }
-                }
-                index ++;
-            }
-            //win level
-            if (j==sentenceLength){
-                Serial.println("congrats");
-              return true;
-              }
-            }
-
-          case 2: {
-            Serial.println("case 2");        
-              //2. Repeat a sequence of 14 colours
-              if (compareSentence == true){
-                return true;
-              }
-
-              else {
-                return false;
-              }
-            }
-            break;
-
-          case 3: {
-              //3. Repeat a sequence of 20 colours
-              if (compareSentence == true){
-                return true;
-              }
-
-              else {
-                return false;
-              }
-            }
-            break;
-
-          case 4: {
-              //4. Repeat a sequence of 31 colours
-              if (compareSentence == true){
-                return true;
-              }
-
-              else {
-                return false;
-              }
-            }
-            break;
-
-          default: {
-              Serial.println("Please choose a valid option. Valid options are 1, 2, 3 or 4.");
-            }
-        }
-
-      } break;
+        int sentenceLength = skillLevel();
+	int index = 0;
+	
+	while(index<sentenceLength){
+		j=0;
+		SentenceAdd(currentSentence);
+		for (int i=0; i<sentenceLength; i++){
+			Serial.println(currentSentence[i]);
+		}
+		simonSpeaks(currentSentence, sentenceLength);
+		Serial.println("user input");
+		
+		while (currentSentence[j]!=0){
+			int input = userSentenceInput();
+			Serial.println(input);
+			if(compare_sentence(currentSentence, input, j) == true){
+				Serial.println("correct");
+				j++;
+			}
+			else{
+				Serial.println("you lose");
+				return false;
+				break;
+			}
+		}
+		index ++;
+	}
+	if (j>=sentenceLength){
+		Serial.println("congrats");
+		return true;
+	}
+}break;
 
     case 2: {
         Serial.println("You have chosen gamemode 2.");
@@ -318,8 +295,13 @@ void setup() {
 
 void loop() {
 
-  game();
+  bool ending = game();
 
-  // put your main code here, to run repeatedly:
-
+  if (ending == true){
+    //Player won
+  }
+  else if(ending == false){
+    //Player Lost
+  }
+  
 }
