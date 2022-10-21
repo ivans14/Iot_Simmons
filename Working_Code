@@ -1,0 +1,325 @@
+int gameModeChoice = 1; 
+bool compareSentence = true;
+int LEDRed = 2;
+int LEDBlue = 1;
+int LEDGreen = 4;
+int LEDYellow = 3;
+int buttonYellow = 9;
+int buttonGreen = 10;
+int buttonRed = 8;
+int buttonBlue = 11;
+int j=0;
+
+const long lightUpTime = 1000;
+const long inputTime = 5000;
+
+int count = 0;
+int currentSentence[32]= {0};
+bool newWord = false;
+bool chosen = false;
+
+
+//=============================================functions==========================================
+
+int gameMode() {
+  Serial.println("Welcome to Simons Game. Please chose a game mode number.");
+  Serial.println("    1. Single Player");
+  Serial.println("    2. Multi Player - adding colors alternately");
+  Serial.println("    1. Multi Player - responsible for a color each");
+
+  while(chosen == false){
+    
+    if(digitalRead(buttonRed) == LOW){
+      int gameModeChoice = 1;
+      chosen = true;
+      Serial.println("Gamemode 1 chosen");
+    }
+    else if(digitalRead(buttonYellow) == LOW){
+      int gameModeChoice = 2;
+      chosen = true;
+    }
+    else if(digitalRead(buttonGreen) == LOW){
+      int gameModeChoice = 3;
+      chosen = true;
+    }
+  }
+
+  //int gameModeChoice = Serial.parseInt();
+  Serial.println("Gamemode 1 ");
+
+  return gameModeChoice;  
+}
+
+int * SentenceAdd(int *  current_sentence) {
+  int ran_number = rand() % 4 +1;
+  current_sentence[count] = ran_number;
+  count +=1;
+  return current_sentence;
+}
+
+bool compare_sentence(int * sentence, int input, int index){
+  if (sentence[index] == input) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+
+void lightLED(int LED,int previousMillis){
+  Serial.println("light");
+  digitalWrite(LED,HIGH);
+  unsigned long currentMillis = millis();
+  while (currentMillis - previousMillis <= lightUpTime){
+    currentMillis=millis(); 
+    }
+  digitalWrite(LED,LOW);
+  delay(500);
+  newWord=true;
+}
+
+//user input function
+int userSentenceInput(){
+  long previousInputMillis = millis();
+  long inputMillis = millis();
+	
+  while (inputMillis - previousInputMillis <= inputTime){
+    inputMillis = millis();
+    if (digitalRead(buttonYellow) == LOW){
+      while(digitalRead(buttonYellow) == LOW){
+        digitalWrite(LEDYellow,HIGH);
+      }
+      digitalWrite(LEDYellow,LOW);
+      return 3;
+    }
+    else if (digitalRead(buttonGreen) == LOW){
+      while(digitalRead(buttonGreen) == LOW){
+        digitalWrite(LEDGreen,HIGH);
+      }
+      digitalWrite(LEDGreen,LOW);
+      return 2;
+    }
+    else if (digitalRead(buttonRed) == LOW){
+      while(digitalRead(buttonRed) == LOW){
+        digitalWrite(LEDRed,HIGH);
+      }
+      digitalWrite(LEDRed,LOW);
+      return 4;
+    }
+    else if (digitalRead(buttonBlue) == LOW){
+      while(digitalRead(buttonBlue) == LOW){
+        digitalWrite(LEDBlue,HIGH);
+      }
+      digitalWrite(LEDBlue,LOW);
+      return 1;
+    }
+  }
+  return 5; 
+}
+
+
+boolean simonSpeaks(int * sentence, int length){
+
+  for (int pos = 0; pos < length; pos++){
+    int element = sentence[pos];
+    boolean newWord = false;
+    unsigned long previousMillis = millis();
+    Serial.print("element" );
+    Serial.println( element);
+    switch(element){
+      
+      case 0: {
+        Serial.println("zero");
+        return false ;
+        }
+        
+      case 1: {
+          lightLED(LEDBlue,previousMillis);
+          
+        }
+        break;
+        
+      case 2: {
+          lightLED(LEDGreen,previousMillis);
+        }
+        break;
+        
+      case 3: {
+          lightLED(LEDYellow,previousMillis);
+        }
+        break;
+      case 4: {
+
+        lightLED(LEDRed,previousMillis);
+     
+        }
+        break;
+    }
+  }
+}
+
+
+//=============================run the game with all functions=========================================
+boolean game() {
+  
+  switch (gameMode()) {
+    case 1: {
+        Serial.println("You have chosen gamemode 1. Please choose skill level from 1-4");
+        Serial.println("    1. Repeat a sequence of 8 colours");
+        Serial.println("    2. Repeat a sequence of 14 colours");
+        Serial.println("    3. Repeat a sequence of 20 colours");
+        Serial.println("    4. Repeat a sequence of 31 colours");
+
+
+        int skillLevel =0;
+         while (skillLevel == 0){
+            if(digitalRead(buttonRed) == LOW){
+                skillLevel = 1;
+                Serial.println("skill 1 chosen");
+                }
+            else if(digitalRead(buttonYellow) == LOW){
+                skillLevel = 2;
+                }
+            else if(digitalRead(buttonGreen) == LOW){
+                int gameModeChoice = 3;
+                }
+            
+        }
+        switch (skillLevel) {
+          case 1: {
+            int sentenceLength = 8; 
+            int index = 0;
+            while(index<sentenceLength){
+                j=0;
+                SentenceAdd(currentSentence);
+                for (int i = 0;i<8;i++){
+                    Serial.println(currentSentence[i]);
+                }
+                simonSpeaks(currentSentence,sentenceLength);
+                Serial.println("user input");
+                //win or loose round
+                
+                while (currentSentence[j]!=0){ //while loop and lose ==false
+                //input a number (rewrite userSentenceInput to return int and light up LED)
+                    int input = userSentenceInput(); 
+                    Serial.println(input);
+                    if (compare_sentence(currentSentence, input, j) == true) {
+                        Serial.println("correct");
+                        j++;
+                    }
+                    else {
+                      Serial.println("you lose idiot");
+                        return false;
+                        break;
+                    }
+                }
+                index ++;
+            }
+            //win level
+            if (j==sentenceLength){
+                Serial.println("congrats");
+              return true;
+              }
+            }
+
+          case 2: {
+            Serial.println("case 2");        
+              //2. Repeat a sequence of 14 colours
+              if (compareSentence == true){
+                return true;
+              }
+
+              else {
+                return false;
+              }
+            }
+            break;
+
+          case 3: {
+              //3. Repeat a sequence of 20 colours
+              if (compareSentence == true){
+                return true;
+              }
+
+              else {
+                return false;
+              }
+            }
+            break;
+
+          case 4: {
+              //4. Repeat a sequence of 31 colours
+              if (compareSentence == true){
+                return true;
+              }
+
+              else {
+                return false;
+              }
+            }
+            break;
+
+          default: {
+              Serial.println("Please choose a valid option. Valid options are 1, 2, 3 or 4.");
+            }
+        }
+
+      } break;
+
+    case 2: {
+        Serial.println("You have chosen gamemode 2.");
+        //run function of gamemode 2
+        if (compareSentence == true){
+                return true;
+              }
+
+              else {
+                return false;
+              }
+      }
+      break;
+
+    case 3: {
+        Serial.println("You have chosen gamemode 2.");
+        //run function of gamemode 2'
+        if (compareSentence == true){
+                return true;
+              }
+
+              else {
+                return false;
+              }
+      }
+      break;
+
+    default: {
+        Serial.println("Please choose a valid option. Valid options are 1, 2 or 3.");
+      }
+  }
+}
+
+
+void setup() {
+
+  Serial.begin(9600);
+
+  pinMode(LEDRed, OUTPUT);
+  pinMode(LEDBlue, OUTPUT);
+  pinMode(LEDGreen, OUTPUT);
+  pinMode(LEDYellow, OUTPUT);
+
+  pinMode(buttonRed, INPUT_PULLUP);
+  pinMode(buttonBlue, INPUT_PULLUP);
+  pinMode(buttonGreen, INPUT_PULLUP);
+  pinMode(buttonYellow, INPUT_PULLUP);
+
+}
+
+void loop() {
+
+  game();
+
+  // put your main code here, to run repeatedly:
+
+}
