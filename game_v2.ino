@@ -1,4 +1,9 @@
-//Missing LCD Screen, Highscore Function /Able to save highscore.
+// Highscore Function /Able to save highscore.
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 int gameModeChoice = 1;
 
@@ -32,6 +37,13 @@ bool resett = false;
 
 int skillLevel() {
   delay(300);
+
+  lcd.clear();
+  lcd.setCursor(1, 0);
+  lcd.print("CHOOSE SKILL:");
+  lcd.setCursor(0, 1);
+  lcd.print("8, 14, 20 or 31");
+
   Serial.println("Please choose skill level from 1-4");
   Serial.println("    1. Repeat a sequence of 8 colours");
   Serial.println("    2. Repeat a sequence of 14 colours");
@@ -44,7 +56,7 @@ int skillLevel() {
     //Serial.println(analogRead(buttonRed));
 
     if (analogRead(buttonRed) == 1024) {
-      skill = 8;
+      skill = 3;
       skillChosen = true;
     }
     else if (digitalRead(buttonYellow) == LOW) {
@@ -61,8 +73,8 @@ int skillLevel() {
     }
   }
   for (int i = 0; i < skill; i++) {
-      currentSentence[i]=0;
-      //Serial.println(currentSentence[i]);
+    currentSentence[i] = 0;
+    //Serial.println(currentSentence[i]);
   }
   return skill;
 }
@@ -182,17 +194,29 @@ bool compare_sentence(int * sentence, int input, int ind) {
 boolean game() {
   int sentenceLength = skillLevel();
   ind = 0;
+  delay(2000);
   Serial.print(sentenceLength);
   Serial.print(ind);
 
   while (ind < sentenceLength) {
+
+    lcd.clear();
+    lcd.setCursor(4, 0);
+    lcd.print("Skill");
+    lcd.setCursor(11, 0);
+    lcd.print(sentenceLength);
+    lcd.setCursor(4, 1);
+    lcd.print("Score:");
+    lcd.setCursor(11, 1);
+    lcd.print(ind);
+
     Serial.print(ind);
     j = 0;
     SentenceAdd(currentSentence);
     delay(50);
-    for (int i = 0; i < sentenceLength; i++) {
+    /*for (int i = 0; i < sentenceLength; i++) {
       //Serial.println(currentSentence[i]);
-    }
+      }*/
 
 
     simonSpeaks(currentSentence, sentenceLength);
@@ -215,27 +239,29 @@ boolean game() {
   }
 
   if (j >= sentenceLength) {
+    lcd.setCursor(11, 1);
+    lcd.print(ind);
     //Serial.println("congrats");
     return true;
   }
 }
 
 void res() {
-  while (resett != true) {
-    delay(50);
-    if (digitalRead(buttonRed) == 1024) {
-      resett = true;
-      j = 0;
-      skill = 0;
-      count = 0;
-      currentSentence[32] = {0};
-      chosen = false;
-      skillChosen = false;
-      ind = 0;
+  resett = true
+  while (resett = true) {
+    j = 0;
+    skill;
+    count = 0;
+    currentSentence[32] = {0};
+    ind = 0;
+
+    chosen = false;
+    skillChosen = false;
+
+    if (analogRead(buttonRed) == 1024) {
+      resett = false
     }
   }
-  delay(50);
-  resett = false;
 }
 
 void setup() {
@@ -255,6 +281,9 @@ void setup() {
 
   randomSeed(analogRead(0));
 
+  lcd.init();
+  lcd.backlight();
+
 }
 
 void loop() {
@@ -262,26 +291,35 @@ void loop() {
   bool ending = game();
 
   if (ending == true) {
-    //Serial.print("YOU WON");
-    j = 0;
-    skill;
-    count = 0;
-    currentSentence[32] = {0};
-    ind = 0;
+    lcd.setCursor(4, 0);
+    lcd.print("You Win");
+    delay(50);
+    res();
 
-    chosen = false;
-    skillChosen = false;
+    /*j = 0;
+      skill;
+      count = 0;
+      currentSentence[32] = {0};
+      ind = 0;
+
+      chosen = false;
+      skillChosen = false;*/
   }
   else if (ending == false) {
-    //Serial.print("YOU LOST");
-    j = 0;
-    skill;
-    count = 0;
-    currentSentence[32] = {0};
-    ind = 0;
+    lcd.setCursor(4, 0);
+    lcd.print("You Lost");
+    delay(50);
+    res();
 
-    chosen = false;
-    skillChosen = false;
+    /*
+      j = 0;
+      skill;
+      count = 0;
+      currentSentence[32] = {0};
+      ind = 0;
+
+      chosen = false;
+      skillChosen = false;*/
   }
   //game();
   delay(500);
